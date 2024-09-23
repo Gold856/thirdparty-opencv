@@ -76,17 +76,14 @@ jobs:
           submodules: 'true'
       - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 17
           distribution: 'zulu'
           architecture: ${{ matrix.architecture }}
       - name: Set Java Heap Size
         run: sed -i 's/-Xmx2g/-Xmx1g/g' gradle.properties
         if: matrix.architecture == 'x86'
-      - run: |
-          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-          set PATH=%PATH%;%ANT_HOME%\bin
-          gradlew build -PjenkinsBuild ${{ matrix.build-options }}
-        shell: cmd
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
+      - run: ./gradlew build -PjenkinsBuild ${{ matrix.build-options }}
         name: Build with Gradle
       - uses: actions/upload-artifact@v4
         with:
@@ -102,7 +99,7 @@ jobs:
           submodules: 'true'
       - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 17
           distribution: 'zulu'
       - run: ./gradlew build -PjenkinsBuild
         name: Build with Gradle
@@ -120,7 +117,7 @@ jobs:
           submodules: 'true'
       - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 17
           distribution: 'zulu'
       - run: ./gradlew build -PjenkinsBuild -Pforcealternatemacbuild
         name: Build with Gradle
@@ -145,7 +142,7 @@ jobs:
           path: build/downloads
       - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 17
           distribution: 'zulu'
       - run: ./gradlew copyToUpload -Prunmerge
         name: Build with Gradle
