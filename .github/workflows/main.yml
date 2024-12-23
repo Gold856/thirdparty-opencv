@@ -107,6 +107,7 @@ jobs:
         with:
           java-version: 11
           distribution: 'zulu'
+      - run: brew install ninja
       - run: ./gradlew build -PjenkinsBuild
         name: Build with Gradle
       - uses: actions/upload-artifact@v4
