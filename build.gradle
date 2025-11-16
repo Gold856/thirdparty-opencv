@@ -34,7 +34,7 @@ ext {
             '-DWITH_CUDA=OFF',
             '-DWITH_IPP=OFF',
             '-DWITH_ITT=OFF',
-            '-DWITH_OPENCL=OFF',
+            '-DWITH_OPENCL=ON',
             '-DWITH_FFMPEG=OFF',
             '-DWITH_OPENEXR=OFF',
             '-DWITH_GSTREAMER=OFF',
