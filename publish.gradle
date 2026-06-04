@@ -167,14 +167,14 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                 }
             }
         } else {
-            from(sharedBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
+            from(sharedBuildDir.resolve("lib").toFile()) {
                 into project.platformPath + '/shared'
                 include '*.lib'  // import library
                 include '*.dll'
                 include '*.pdb'
                 exclude 'opencv_ts*'
             }
-            from(sharedBuildDir.resolve("bin").resolve(buildTypeFolder).toFile()) {
+            from(sharedBuildDir.resolve("bin").toFile()) {
                 into project.platformPath + '/shared'
                 include '*.lib'  // import library
                 include '*.dll'
@@ -211,7 +211,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                 exclude 'libopencv_*.a'
             }
         } else {
-            from(staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
+            from(staticBuildDir.resolve("lib").toFile()) {
                 into project.platformPath + '/static'
                 include 'opencv*.lib'
                 include '*.pdb'
@@ -263,7 +263,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             jniFileName = "libopencv_java${libVersion}.dylib"
             jniFile = new File(directory.absolutePath, "${jniFileName}")
         } else {
-            directory = staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()
+            directory = staticBuildDir.resolve("lib").toFile()
             jniFileName = "opencv_java${libVersion}.dll"
             jniFile = new File(directory.absolutePath, "${jniFileName}")
         }

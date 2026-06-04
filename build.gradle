@@ -152,15 +152,6 @@ ext.cmakeBuildSharedDebugDirectory = Paths.get(projectDir.canonicalPath).resolve
 ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
-if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 18 2026"
-    if (project.platform == "windows-x86_64") {
-        ext.cmakeArch = 'x64'
-    } else if (project.platform == "windows-arm64") {
-        ext.cmakeArch = 'arm64'
-    }
-    ext.cmakeGenerator = gen
-}
 
 repositories {
     mavenLocal()
@@ -224,18 +215,13 @@ if (project.platform == "linux-arm64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "osx-x86_64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path" + "-DWITH_KLEIDICV=OFF"
-            } else if (project.platform == "windows-arm64") {
-                return args + "-DOPENCV_SKIP_SYSTEM_PROCESSOR_DETECTION=TRUE" + "-DAARCH64=ON"
             }
             return args
         }
 
         workingDir buildDirectory.toString()
 
-        if (project.platform.startsWith("windows")) {
-            executable project.cmakePath
-            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
-        } else if (project.platform.startsWith("osx")) {
+        if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = ['-G', "Xcode", project.rootPath] + cmakeArgs()
             if (project.platform == "osx-arm64") {
@@ -245,7 +231,7 @@ if (project.platform == "linux-arm64") {
             }
         } else {
             executable project.cmakePath
-            args = cmakeArgs() + [project.rootPath]
+            args = cmakeArgs() + ['-G', 'Ninja', project.rootPath]
         }
     }
 
@@ -255,16 +241,7 @@ if (project.platform == "linux-arm64") {
         dependsOn 'cmake' + buildType
         workingDir buildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
-
-        if (project.platform.startsWith("windows")) {
-            def platformArg = "/p:Platform=x64"
-            if (project.platform == "windows-arm64") {
-                platformArg = "/p:Platform=arm64"
-            }
-
-            executable 'cmake'
-            args = ['--build', '.', '--parallel', "${processors}", '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', platformArg]
-        } else if (project.platform.startsWith("osx")) {
+        if (project.platform.startsWith("osx")) {
             executable 'sh'
             String incantation = "xcodebuild -alltargets -configuration ${buildTypeFolder} -jobs ${processors}"
             if (project.hasProperty("developerID")) {
@@ -282,9 +259,9 @@ if (project.platform == "linux-arm64") {
         if (project.platform.startsWith('windows')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
                 dependsOn 'make' + buildType
-                workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
+                workingDir buildDirectory.resolve("lib").toString()
                 executable 'lib'
-                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../3rdparty/lib/ade", "../3rdparty/lib/libjpeg-turbo", "../3rdparty/lib/libopenjp2", "../3rdparty/lib/libpng", "../3rdparty/lib/zlib"]
                 def setArgs = ["/OUT:opencv${project.libVersion}.lib"]
                 inputFiles.each {
                     def inFile = it
@@ -296,7 +273,7 @@ if (project.platform == "linux-arm64") {
                     setArgs << inFile
                 }
                 if (project.platform == "windows-arm64") {
-                    setArgs += "../../3rdparty/lib/${buildTypeFolder}/tegra_hal.lib"
+                    setArgs += "../3rdparty/lib/tegra_hal.lib"
                 }
                 args = setArgs
             }

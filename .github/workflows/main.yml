@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: 'true'
-      - run: sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/* && sudo rm -f /bin/ant && sudo ln -s /usr/share/ant/bin/ant /bin/ant
+      - run: sudo apt-get update && sudo apt-get install ant ninja-build -y && sudo rm -rf /var/lib/apt/lists/* && sudo rm -f /bin/ant && sudo ln -s /usr/share/ant/bin/ant /bin/ant
         name: Install Ant
       - run: ./gradlew build -PjenkinsBuild ${{ matrix.build-options }}
         name: Build with Gradle
@@ -45,12 +45,16 @@ jobs:
         include:
           - artifact-name: Win64Release
             build-options: "-PskipDebug"
+            arch: x64
           - artifact-name: WinArm64Release
-            build-options: "-PskipDebug -Pplatform=windows-arm64"
+            build-options: "-PskipDebug -Pplatform=windows-arm64 -Ptoolchain=..\\aarch64-pc-windows-msvc.cmake"
+            arch: amd64_arm64
           - artifact-name: Win64
             build-options: "-PskipRelease -PskipSources"
+            arch: x64
           - artifact-name: WinArm64
-            build-options: "-PskipRelease -PskipSources -Pplatform=windows-arm64"
+            build-options: "-PskipRelease -PskipSources -Pplatform=windows-arm64 -Ptoolchain=..\\aarch64-pc-windows-msvc.cmake"
+            arch: amd64_arm64
 
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: windows-latest
@@ -63,6 +67,8 @@ jobs:
           java-version: 25
           distribution: 'temurin'
       - uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: ${{ matrix.arch }}
       - run: |
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild ${{ matrix.build-options }}
