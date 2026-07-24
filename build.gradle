@@ -194,7 +194,7 @@ if (project.platform == "linux-arm64") {
                 args = args + '-DBUILD_SHARED_LIBS=ON' + '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON' + '-DCMAKE_POLICY_VERSION_MINIMUM=3.10'
 
                 if (project.platform.contains('windows')) {
-                    args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
+                    args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100 /OPT:REF /OPT:ICF' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
                 }
             } else {
                 args = args + '-DBUILD_SHARED_LIBS=OFF'
