@@ -234,7 +234,7 @@ if (project.platform == "linux-arm64") {
 
         if (project.platform.startsWith("windows")) {
             executable project.cmakePath
-            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
+            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath, '-DOPENCV_EXTRA_FLAGS=/d2prunedbinfo']
         } else if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = ['-G', "Xcode", project.rootPath] + cmakeArgs()
