@@ -204,7 +204,10 @@ if (project.platform == "linux-arm64") {
             }
 
             if (buildType.contains('Debug')) {
-                args = args + '-DCMAKE_BUILD_TYPE=Debug'
+                args = args + '-DCMAKE_BUILD_TYPE=Debug' + '-DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded'
+                if (project.platform.contains('windows')) {
+                    args = args + '-DOPENCV_EXTRA_FLAGS_DEBUG=/Z7'
+                }
             } else {
                 args = args + '-DCMAKE_BUILD_TYPE=Release'
             }
