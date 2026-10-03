@@ -18,15 +18,15 @@ jobs:
           - container: wpilib/aarch64-cross-debian:trixie
             artifact-name: Arm64
             build-options: "-Pplatform=linux-arm64 -Ptoolchain=/usr/local/toolchain-config.cmake"
-          - container: wpilib/ubuntu-base:24.04
+          - container: wpilib/debian-base:trixie
             artifact-name: Linux
             build-options: ""
 
     name: "Build - ${{ matrix.artifact-name }}"
-    runs-on: ubuntu-latest
+    runs-on: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-8vcpu-ubuntu-2404', 'ubuntu-24.04') }}
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - run: sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/* && sudo rm -f /bin/ant && sudo ln -s /usr/share/ant/bin/ant /bin/ant
@@ -45,24 +45,30 @@ jobs:
         include:
           - artifact-name: Win64Release
             build-options: "-PskipDebug"
+            arch: x64
           - artifact-name: WinArm64Release
             build-options: "-PskipDebug -Pplatform=windows-arm64"
+            arch: amd64_arm64
           - artifact-name: Win64
             build-options: "-PskipRelease -PskipSources"
+            arch: x64
           - artifact-name: WinArm64
             build-options: "-PskipRelease -PskipSources -Pplatform=windows-arm64"
+            arch: amd64_arm64
 
     name: "Build - ${{ matrix.artifact-name }}"
-    runs-on: windows-latest
+    runs-on: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-windows-2025', 'windows-2025') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           java-version: 25
           distribution: 'temurin'
-      - uses: ilammy/msvc-dev-cmd@v1.13.0
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: ${{ matrix.arch }}
       - run: |
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild ${{ matrix.build-options }}
@@ -75,12 +81,12 @@ jobs:
 
   build-mac:
     name: "Build - macOS (Arm)"
-    runs-on: macOS-15
+    runs-on: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-6vcpu-macos-15', 'macOS-15') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           java-version: 25
           distribution: 'temurin'
@@ -93,12 +99,12 @@ jobs:
 
   build-mac-arm:
     name: "Build - macOS"
-    runs-on: macOS-15
+    runs-on: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-6vcpu-macos-15', 'macOS-15') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           java-version: 25
           distribution: 'temurin'
@@ -112,9 +118,9 @@ jobs:
   make_universal:
     name: Make Universal
     needs: [build-mac, build-mac-arm]
-    runs-on: macos-15
+    runs-on: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-6vcpu-macos-15', 'macOS-15') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: macOS
@@ -123,7 +129,7 @@ jobs:
         with:
           name: macOSArm
           path: build/downloads
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           java-version: 25
           distribution: 'temurin'
@@ -154,9 +160,9 @@ jobs:
   combine:
     name: Combine
     needs: [build-docker, build-windows, make_universal]
-    runs-on: ubuntu-latest
+    runs-on: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: wpilibsuite/build-tools
       - uses: actions/download-artifact@v8
