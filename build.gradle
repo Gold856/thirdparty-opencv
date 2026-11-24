@@ -195,6 +195,9 @@ if (project.platform == "linux-arm64") {
             def args = defaultCmakeArgs
             if (buildType.contains("Shared")) {
                 args = args + '-DBUILD_SHARED_LIBS=ON'
+                if (!buildType.contains('Debug')) {
+                    args = args + '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON'
+                }
 
                 if (project.platform.contains('windows')) {
                     args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
