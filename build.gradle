@@ -200,7 +200,8 @@ if (project.platform == "linux-arm64") {
                 }
 
                 if (project.platform.contains('windows')) {
-                    args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
+                    def opt = buildType.contains('Debug') ? '' : '/OPT:REF /OPT:ICF'
+                    args = args + "-DCMAKE_SHARED_LINKER_FLAGS='/DEPENDENTLOADFLAG:0x1100 $opt'"  + "-DCMAKE_MODULE_LINKER_FLAGS='/DEPENDENTLOADFLAG:0x1100 $opt'"
                 }
             } else {
                 args = args + '-DBUILD_SHARED_LIBS=OFF'
